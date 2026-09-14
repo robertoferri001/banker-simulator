@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banker Simulator - Simulatore Bancario Realistico</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Schermata di caricamento -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="bank-logo">🏦</div>
+            <h1>BANCA REALE</h1>
+            <p>Simulatore Bancario Professionale</p>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schermata principale del gioco -->
+    <div id="gameContainer" class="game-container hidden">
+        <!-- Menu principale -->
+        <div id="mainMenu" class="screen">
+            <div class="menu-content">
+                <div class="bank-header">
+                    <div class="bank-logo-large">🏦</div>
+                    <h1>BANCA REALE</h1>
+                    <p class="subtitle">Centro Operativo Principale</p>
+                </div>
+
+                <div class="menu-buttons">
+                    <button class="menu-button tutorial-btn" onclick="startGame(true)">
+                        <span class="icon">📚</span>
+                        <span>Inizia con Tutorial</span>
+                        <span class="desc">Impara le operazioni di base</span>
+                    </button>
+                    <button class="menu-button play-btn" onclick="startGame(false)">
+                        <span class="icon">▶️</span>
+                        <span>Inizia Subito</span>
+                        <span class="desc">Modalità libera</span>
+                    </button>
+                    <button class="menu-button settings-btn" onclick="openSettings()">
+                        <span class="icon">⚙️</span>
+                        <span>Impostazioni</span>
+                        <span class="desc">Configurare il gioco</span>
+                    </button>
+                    <button class="menu-button credits-btn" onclick="showCredits()">
+                        <span class="icon">ℹ️</span>
+                        <span>Crediti</span>
+                        <span class="desc">Informazioni sul gioco</span>
+                    </button>
+                </div>
+
+                <div class="footer-info">
+                    <p>Versione 1.0 - Simulatore Bancario Professionale</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schermata di gioco principale -->
+        <div id="gameScreen" class="screen hidden">
+            <div class="game-header">
+                <div class="bank-info">
+                    <h2>🏦 BANCA REALE - SPORTELLO PRINCIPALE</h2>
+                    <p id="dateTime"></p>
+                </div>
+                <div class="player-stats">
+                    <div class="stat">
+                        <span class="label">Clienti Serviti:</span>
+                        <span id="clientsServed" class="value">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="label">Reputazione:</span>
+                        <span id="reputation" class="value">⭐⭐⭐⭐⭐</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-content">
+                <!-- Area cliente -->
+                <div class="client-area">
+                    <div id="clientCard" class="client-card">
+                        <div class="client-entry">
+                            <div class="client-icon">👤</div>
+                            <div class="client-info">
+                                <p id="clientName" class="client-name">In attesa di un cliente...</p>
+                                <p id="clientStatus" class="client-status">Nessuno sportello</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Box -->
+                    <div class="chat-container">
+                        <div class="chat-header">
+                            <span id="chatTitle">Chat Sportello</span>
+                            <button class="close-btn" onclick="callNextClient()" id="nextClientBtn" style="display:none;">
+                                ✕ Prossimo Cliente
+                            </button>
+                        </div>
+                        <div id="chatBox" class="chat-box">
+                            <div class="chat-message system">
+                                <p>Benvenuto nel simulatore bancario realistico. Clicca su "Chiama Cliente" per iniziare.</p>
+                            </div>
+                        </div>
+                        <div class="chat-input-container">
+                            <input type="text" id="bankerInput" class="banker-input" placeholder="Digita la tua risposta..." disabled>
+                            <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>Invia</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Area operazioni -->
+                <div class="operations-area">
+                    <div class="operations-panel">
+                        <h3>📋 OPERAZIONI DISPONIBILI</h3>
+                        <div id="operationsContainer" class="operations-container">
+                            <p class="placeholder">Seleziona un cliente per visualizzare le operazioni disponibili</p>
+                        </div>
+                    </div>
+
+                    <!-- Modulo operazione -->
+                    <div id="operationForm" class="operation-form hidden">
+                        <h3 id="operationTitle">Operazione Bancaria</h3>
+                        <form id="formOperation" onsubmit="completeOperation(event)">
+                            <div id="formFields"></div>
+                            <div class="form-buttons">
+                                <button type="submit" class="btn-confirm">✓ Conferma Operazione</button>
+                                <button type="button" class="btn-cancel" onclick="cancelOperation()">✗ Annulla</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pulsanti principali -->
+            <div class="game-footer">
+                <button class="footer-btn" id="callClientBtn" onclick="callNextClient()">
+                    📞 Chiama Cliente
+                </button>
+                <button class="footer-btn" id="pauseBtn" onclick="pauseGame()">
+                    ⏸️ Pausa
+                </button>
+                <button class="footer-btn menu-return" onclick="returnToMenu()">
+                    🏠 Menu Principale
+                </button>
+            </div>
+        </div>
+
+        <!-- Tutorial Screen -->
+        <div id="tutorialScreen" class="screen hidden">
+            <div class="tutorial-content">
+                <button class="close-tutorial" onclick="skipTutorial()">✕</button>
+                <h2>📚 TUTORIAL - Come Giocare</h2>
+                <div id="tutorialSteps" class="tutorial-steps"></div>
+                <div class="tutorial-buttons">
+                    <button onclick="previousTutorialStep()">← Precedente</button>
+                    <button id="nextTutBtn" onclick="nextTutorialStep()">Successivo →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pause Menu -->
+        <div id="pauseMenu" class="screen hidden">
+            <div class="pause-content">
+                <h2>⏸️ GIOCO IN PAUSA</h2>
+                <div class="pause-buttons">
+                    <button onclick="resumeGame()">Riprendi Gioco</button>
+                    <button onclick="returnToMenu()">Torna al Menu</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Screen -->
+        <div id="settingsScreen" class="screen hidden">
+            <div class="settings-content">
+                <h2>⚙️ IMPOSTAZIONI</h2>
+                <div class="settings-options">
+                    <div class="setting-group">
+                        <label for="volumeSlider">Volume Musica:</label>
+                        <input type="range" id="volumeSlider" min="0" max="100" value="70">
+                    </div>
+                    <div class="setting-group">
+                        <label for="difficultySelect">Difficoltà:</label>
+                        <select id="difficultySelect">
+                            <option value="easy">Facile</option>
+                            <option value="normal" selected>Normale</option>
+                            <option value="hard">Difficile</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="soundEffects" checked>
+                            Effetti Sonori
+                        </label>
+                    </div>
+                </div>
+                <button onclick="returnToMenu()">Torna al Menu</button>
+            </div>
+        </div>
+
+        <!-- Credits Screen -->
+        <div id="creditsScreen" class="screen hidden">
+            <div class="credits-content">
+                <h2>ℹ️ CREDITI</h2>
+                <div class="credits-text">
+                    <p><strong>Banker Simulator</strong></p>
+                    <p>Simulatore Bancario Realistico v1.0</p>
+                    <p>Sviluppato come progetto di simulazione professionale</p>
+                    <p class="credits-footer">© 2026 - Tutti i diritti riservati</p>
+                </div>
+                <button onclick="returnToMenu()">Torna al Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="gameData.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
